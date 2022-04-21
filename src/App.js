@@ -15,17 +15,13 @@ function App() {
     { id: 3, title: 'C++', body: 'C++ - yazik' }
   ])
 
-  
-
-  const addNewPost = (e) => {
-    e.preventDefault()
-      setPosts([...posts, {...post, id:Date.now()}])
-      setPost({title: '', body: ''})
+  const createPost=(newPost) => {
+    setPosts([...posts, newPost])
   }
 
   return (
     <div className="App">
-      <PostForm></PostForm>
+      <PostForm create = {createPost}></PostForm>
       <PostList posts={posts} title={'Список постов'} />
     </div>
   );
