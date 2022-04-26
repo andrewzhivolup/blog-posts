@@ -1,5 +1,6 @@
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import Counter from "./components/Counter";
+import PostFilter from "./components/PostFilter";
 import PostForm from "./components/PostForm";
 import PostItem from "./components/PostItem";
 import PostList from "./components/PostList";
@@ -15,7 +16,20 @@ function App() {
     { id: 2, title: 'Python', body: 'Python - yazik' },
     { id: 3, title: 'C++', body: 'C++ - yazik' }
   ])
-  const [selectedSort, setSelectedSort] = useState('')
+  const [filter, setFilter] = useState({sort:'', query:''})
+
+
+  const sortedPosts = useMemo(() => {
+    console.log('wsda')
+    if (filter.sort) {
+      return [...posts].sort((a, b) => a[filter.sort].localeCompare(b[filter.sort]))
+    }
+    return posts
+  }, [filter.sort, posts])
+
+  const sortedAndSearchedPosts = useMemo(()=>{
+      return sortedPosts.filter(post => post.title.toLowerCase().includes(filter.query.toLowerCase()))
+  }, [filter.query, sortedPosts])
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost])
@@ -25,32 +39,13 @@ function App() {
     setPosts(posts.filter(p => p.id !== post.id))
   }
 
-  const sortPosts = (sort) => {
-    setSelectedSort(sort);
-    console.log(sort)
-    setPosts([...posts].sort((a,b)=> a[sort].localeCompare(b[sort])))
-  }
-
   return (
     <div className="App">
       <PostForm create={createPost}></PostForm>
       <hr style={{ margin: '15px 0' }}></hr>
-      <div>
-        <MySelect
-          value={selectedSort}
-          onChange={sortPosts}
-          defaultValue="Сортировка"
-          options={[
-            { value: 'title', name: 'По заголовку' },
-            { value: 'body', name: 'По описанию' }
-          ]}
-        ></MySelect>
+      <PostFilter filter={filter} setFilter={setFilter} ></PostFilter>
+      <PostList remove={removePost} posts={sortedAndSearchedPosts} title={'Список постов'} />
       </div>
-      {posts.length
-        ? <PostList remove={removePost} posts={posts} title={'Список постов'} />
-        : <h1 style={{ textAlign: "Center" }} >Посты не найдены</h1>
-      }
-    </div>
   );
 }
 
